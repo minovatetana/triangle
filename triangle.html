@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Розв'язування трикутників — Інтерактивний тренажер</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --accent: #f97316;
+      --accent-light: #fff7ed;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+      padding: 20px 24px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.16);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    svg#triangleSvg {
+      width: 100%;
+      height: auto;
+      display: block;
+      aspect-ratio: 600 / 430;
+    }
+
+    .vertex-group {
+      cursor: grab;
+    }
+
+    .vertex-group:active {
+      cursor: grabbing;
+    }
+
+    .hint-bar {
+      margin-top: 10px;
+      font-size: 0.875rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sliders-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .sliders-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .slider-box {
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .slider-label span.val {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .warning-msg {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--danger);
+      display: none;
+      font-weight: 500;
+    }
+
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .trainer-box {
+      background: var(--accent-light);
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .trainer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-btn:hover {
+      background: #ea580c;
+    }
+
+    .quiz-controls {
+      margin-top: 12px;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .quiz-controls.active {
+      display: flex;
+    }
+
+    .quiz-input {
+      padding: 8px 12px;
+      border: 1px solid #fdba74;
+      border-radius: 8px;
+      width: 130px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .check-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .quiz-feedback {
+      width: 100%;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .calc-step {
+      background: #f8fafc;
+      border-left: 4px solid var(--primary);
+      padding: 10px 14px;
+      border-radius: 0 10px 10px 0;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .calc-step.highlight {
+      background: var(--accent-light);
+      border-left-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .angles-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .angle-pill {
+      text-align: center;
+      padding: 8px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .angle-pill.target {
+      background: var(--accent-light);
+      color: #c2410c;
+      border: 1px solid #fdba74;
+    }
+
+    .formula-block {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .formula-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .formula-title {
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .formula-math {
+      font-family: 'Cambria Math', 'Times New Roman', serif;
+      font-size: 1.05rem;
+      background: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      margin: 4px 0;
+      color: #1e293b;
+    }
+
+    .formula-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>📐 Розв'язування трикутників (Геометрія 9 клас)</h1>
+      <p>Перетягуйте вершини A, B, C або змінюйте сторони для автоматичного обчислення кутів</p>
+    </div>
+    <div class="presets">
+      <button class="preset-btn" onclick="applyPreset(8, 10, 12)">Гострокутний (8, 10, 12)</button>
+      <button class="preset-btn" onclick="applyPreset(6, 8, 10)">Прямокутний (6, 8, 10)</button>
+      <button class="preset-btn" onclick="applyPreset(9, 9, 9)">Рівносторонній (9, 9, 9)</button>
+      <button class="preset-btn" onclick="applyPreset(6, 7, 11)">Тупокутний (6, 7, 11)</button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- Ліва колонка: Інтерактивний трикутник -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Інтерактивний трикутник ABC</div>
+        <span class="badge" id="triangleTypeBadge">Гострокутний трикутник</span>
+      </div>
+
+      <div class="canvas-wrapper">
+        <svg id="triangleSvg" viewBox="0 0 600 430">
+          <defs>
+            <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="600" height="430" fill="url(#grid)" />
+
+          <!-- Сектори кутів -->
+          <path id="arcA" fill="rgba(249, 115, 22, 0.22)" stroke="#f97316" stroke-width="2.5" />
+          <path id="arcB" fill="rgba(37, 99, 235, 0.1)" stroke="#94a3b8" stroke-width="1.5" />
+          <path id="arcC" fill="rgba(37, 99, 235, 0.1)" stroke="#94a3b8" stroke-width="1.5" />
+
+          <!-- Сторони трикутника -->
+          <polygon id="triPoly" fill="rgba(37, 99, 235, 0.05)" stroke="#1e293b" stroke-width="3" stroke-linejoin="round" />
+
+          <!-- Підписи значень кутів -->
+          <text id="angleTextA" font-size="16" font-weight="700" fill="#c2410c" text-anchor="middle"></text>
+          <text id="angleTextB" font-size="13" font-weight="600" fill="#475569" text-anchor="middle"></text>
+          <text id="angleTextC" font-size="13" font-weight="600" fill="#475569" text-anchor="middle"></text>
+
+          <!-- Підписи довжин сторін -->
+          <g id="labelABGroup">
+            <rect id="bgAB" rx="6" ry="6" fill="white" stroke="#cbd5e1" stroke-width="1" />
+            <text id="textAB" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle" dominant-baseline="central"></text>
+          </g>
+          <g id="labelACGroup">
+            <rect id="bgAC" rx="6" ry="6" fill="white" stroke="#cbd5e1" stroke-width="1" />
+            <text id="textAC" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle" dominant-baseline="central"></text>
+          </g>
+          <g id="labelBCGroup">
+            <rect id="bgBC" rx="6" ry="6" fill="white" stroke="#cbd5e1" stroke-width="1" />
+            <text id="textBC" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle" dominant-baseline="central"></text>
+          </g>
+
+          <!-- Вершини для перетягування -->
+          <g class="vertex-group" id="vertexA" data-vertex="A">
+            <circle r="22" fill="transparent" />
+            <circle r="9" fill="#f97316" stroke="white" stroke-width="2.5" />
+            <text id="nameA" font-size="18" font-weight="800" fill="#1e293b" text-anchor="middle">A</text>
+          </g>
+          <g class="vertex-group" id="vertexB" data-vertex="B">
+            <circle r="22" fill="transparent" />
+            <circle r="9" fill="#2563eb" stroke="white" stroke-width="2.5" />
+            <text id="nameB" font-size="18" font-weight="800" fill="#1e293b" text-anchor="middle">B</text>
+          </g>
+          <g class="vertex-group" id="vertexC" data-vertex="C">
+            <circle r="22" fill="transparent" />
+            <circle r="9" fill="#2563eb" stroke="white" stroke-width="2.5" />
+            <text id="nameC" font-size="18" font-weight="800" fill="#1e293b" text-anchor="middle">C</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="hint-bar">
+        <span>💡 Потягніть за кольорову точку <b>A</b>, <b>B</b> або <b>C</b>, щоб змінити трикутник</span>
+        <span>Масштаб: 1 од. = 25 px</span>
+      </div>
+
+      <!-- Повзунки сторін -->
+      <div class="sliders-grid">
+        <div class="slider-box">
+          <div class="slider-label">
+            <span>Сторона AB (c):</span>
+            <span class="val" id="valAB">8.0</span>
+          </div>
+          <input type="range" id="sliderAB" min="3" max="15" step="0.5" value="8" oninput="onSliderChange('AB', this.value)">
+        </div>
+        <div class="slider-box">
+          <div class="slider-label">
+            <span>Сторона AC (b):</span>
+            <span class="val" id="valAC">10.0</span>
+          </div>
+          <input type="range" id="sliderAC" min="3" max="15" step="0.5" value="10" oninput="onSliderChange('AC', this.value)">
+        </div>
+        <div class="slider-box">
+          <div class="slider-label">
+            <span>Сторона BC (a):</span>
+            <span class="val" id="valBC">12.0</span>
+          </div>
+          <input type="range" id="sliderBC" min="3" max="18" step="0.5" value="12" oninput="onSliderChange('BC', this.value)">
+        </div>
+      </div>
+      <div class="warning-msg" id="inequalityWarning">
+        ⚠️ Порушено нерівність трикутника: сума двох сторін має бути більшою за третю!
+      </div>
+    </div>
+
+    <!-- Права колонка: Розрахунки + Довідник -->
+    <div class="right-column">
+      <!-- Блок розрахунку кута -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🧮 Автоматичний розрахунок кута A</div>
+        </div>
+
+        <!-- Режим самоперевірки -->
+        <div class="trainer-box">
+          <div class="trainer-header">
+            <span style="font-size: 0.9rem; font-weight: 600;">Режим тренажера:</span>
+            <button class="toggle-btn" id="toggleQuizBtn" onclick="toggleQuizMode()">🙈 Сховати відповідь (∠A = ?)</button>
+          </div>
+          <div class="quiz-controls" id="quizControls">
+            <span style="font-size: 0.9rem;">Введіть ∠A (°):</span>
+            <input type="number" step="0.1" class="quiz-input" id="userAngleInput" placeholder="Напр. 82.8">
+            <button class="check-btn" onclick="checkUserAnswer()">Перевірити</button>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+          </div>
+        </div>
+
+        <div id="solutionSteps">
+          <div class="calc-step">
+            <b>1. Формула косинуса кута A:</b><br>
+            cos A = (AB² + AC² − BC²) / (2 · AB · AC)
+          </div>
+          <div class="calc-step" id="stepSubstitution"></div>
+          <div class="calc-step" id="stepCosValue"></div>
+          <div class="calc-step highlight" id="stepFinalAngle"></div>
+        </div>
+
+        <div class="angles-summary">
+          <div class="angle-pill target" id="pillA">∠A = 82.8°</div>
+          <div class="angle-pill" id="pillB">∠B = 55.8°</div>
+          <div class="angle-pill" id="pillC">∠C = 41.4°</div>
+        </div>
+      </div>
+
+      <!-- Довідник формул -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📚 Корисні матеріали та формули</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-title">1. Теорема косинусів (для пошуку сторони)</div>
+          <div class="formula-math">a² = b² + c² − 2bc · cos α</div>
+          <div class="formula-desc">Квадрат сторони трикутника дорівнює сумі квадратів двох інших сторін мінус подвоєний добуток цих сторін на косинус кута між ними.</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-title">2. Наслідок з теореми косинусів (для пошуку кута)</div>
+          <div class="formula-math">cos A = (b² + c² − a²) / (2bc)</div>
+          <div class="formula-desc">Використовується, коли відомі всі три сторони трикутника (де <b>a = BC</b> — сторона навпроти кута A).</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-title">3. Теорема синусів</div>
+          <div class="formula-math">a / sin A = b / sin B = c / sin C = 2R</div>
+          <div class="formula-desc">Сторони трикутника пропорційні синусам протилежних кутів (R — радіус описаного кола).</div>
+        </div>
+
+        <div class="formula-block">
+          <div class="formula-title">4. Визначення виду трикутника за кутом A</div>
+          <div class="formula-desc">
+            • Якщо <b>cos A &gt; 0</b> (a² &lt; b² + c²) — кут A <b>гострий</b>.<br>
+            • Якщо <b>cos A = 0</b> (a² = b² + c²) — кут A <b>прямий (90°)</b>.<br>
+            • Якщо <b>cos A &lt; 0</b> (a² &gt; b² + c²) — кут A <b>тупий</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCALE = 25; // 1 одиниця = 25 пікселів
+  const svg = document.getElementById('triangleSvg');
+
+  // Початкові координати вершин для трикутника AB=8, AC=10, BC=12
+  let pts = {
+    B: { x: 150, y: 340 },
+    C: { x: 450, y: 340 },
+    A: { x: 262.5, y: 174.17 }
+  };
+
+  let activeVertex = null;
+  let quizHidden = false;
+
+  function dist(p1, p2) {
+    return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+  }
+
+  // Перетворення координат екрана у координати SVG viewBox
+  function getSvgPoint(evt) {
+    const pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  // Підключення Pointer Events для безвідмовного перетягування вершин
+  document.querySelectorAll('.vertex-group').forEach(group => {
+    group.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      activeVertex = group.getAttribute('data-vertex');
+      group.setPointerCapture(e.pointerId);
+    });
+
+    group.addEventListener('pointermove', (e) => {
+      if (!activeVertex) return;
+      const svgPt = getSvgPoint(e);
+      // Обмежуємо координати всередині полотна з відступом
+      const clampedX = Math.max(35, Math.min(565, svgPt.x));
+      const clampedY = Math.max(40, Math.min(390, svgPt.y));
+
+      // Перевірка, щоб вершини не злипалися
+      const testPts = { ...pts, [activeVertex]: { x: clampedX, y: clampedY } };
+      if (
+        dist(testPts.A, testPts.B) > 45 &&
+        dist(testPts.A, testPts.C) > 45 &&
+        dist(testPts.B, testPts.C) > 45
+      ) {
+        pts[activeVertex] = { x: clampedX, y: clampedY };
+        document.getElementById('inequalityWarning').style.display = 'none';
+        updateAll();
+      }
+    });
+
+    group.addEventListener('pointerup', (e) => {
+      if (activeVertex) {
+        group.releasePointerCapture(e.pointerId);
+        activeVertex = null;
+      }
+    });
+
+    group.addEventListener('pointercancel', () => {
+      activeVertex = null;
+    });
+  });
+
+  // Побудова трикутника за трьома сторонами (AB=c, AC=b, BC=a)
+  function buildFromSides(c, b, a) {
+    if (a + b <= c + 0.05 || a + c <= b + 0.05 || b + c <= a + 0.05) {
+      document.getElementById('inequalityWarning').style.display = 'block';
+      return false;
+    }
+    document.getElementById('inequalityWarning').style.display = 'none';
+
+    const pxA = a * SCALE;
+    const pxB = b * SCALE;
+    const pxC = c * SCALE;
+
+    // Розміщуємо сторону BC горизонтально по центру
+    const centerX = 300;
+    const baseY = 345;
+    const bx = centerX - pxA / 2;
+    const cx = centerX + pxA / 2;
+
+    // Знаходимо координати вершини A за теоремою косинусів
+    const cosB = (pxC * pxC + pxA * pxA - pxB * pxB) / (2 * pxC * pxA);
+    const sinB = Math.sqrt(Math.max(0, 1 - cosB * cosB));
+    const ax = bx + pxC * cosB;
+    const ay = baseY - pxC * sinB;
+
+    pts.B = { x: bx, y: baseY };
+    pts.C = { x: cx, y: baseY };
+    pts.A = { x: ax, y: Math.max(45, ay) };
+
+    updateAll();
+    return true;
+  }
+
+  function applyPreset(c, b, a) {
+    document.getElementById('quizFeedback').textContent = '';
+    buildFromSides(c, b, a);
+  }
+
+  function onSliderChange(side, val) {
+    let c = parseFloat(document.getElementById('sliderAB').value);
+    let b = parseFloat(document.getElementById('sliderAC').value);
+    let a = parseFloat(document.getElementById('sliderBC').value);
+    if (side === 'AB') c = parseFloat(val);
+    if (side === 'AC') b = parseFloat(val);
+    if (side === 'BC') a = parseFloat(val);
+    buildFromSides(c, b, a);
+  }
+
+  // Побудова SVG дуги сектора кута
+  function createAngleArc(vertex, p1, p2, radius) {
+    const a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+    const a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+
+    const x1 = vertex.x + radius * Math.cos(a1);
+    const y1 = vertex.y + radius * Math.sin(a1);
+    const x2 = vertex.x + radius * Math.cos(a2);
+    const y2 = vertex.y + radius * Math.sin(a2);
+
+    let diff = a2 - a1;
+    while (diff <= -Math.PI) diff += 2 * Math.PI;
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    const sweepFlag = diff > 0 ? 1 : 0;
+
+    return `M ${vertex.x} ${vertex.y} L ${x1} ${y1} A ${radius} ${radius} 0 0 ${sweepFlag} ${x2} ${y2} Z`;
+  }
+
+  // Позиціонування тексту біля кута всередині трикутника
+  function placeAngleLabel(textEl, vertex, p1, p2, offset, content) {
+    const v1x = p1.x - vertex.x;
+    const v1y = p1.y - vertex.y;
+    const l1 = Math.hypot(v1x, v1y) || 1;
+
+    const v2x = p2.x - vertex.x;
+    const v2y = p2.y - vertex.y;
+    const l2 = Math.hypot(v2x, v2y) || 1;
+
+    let bx = v1x / l1 + v2x / l2;
+    let by = v1y / l1 + v2y / l2;
+    const bl = Math.hypot(bx, by) || 1;
+    bx /= bl;
+    by /= bl;
+
+    textEl.setAttribute('x', vertex.x + bx * offset);
+    textEl.setAttribute('y', vertex.y + by * offset + 5);
+    textEl.textContent = content;
+  }
+
+  // Позиціонування підпису сторони назовні від центру трикутника
+  function placeSideLabel(rectEl, textEl, p1, p2, centroid, labelStr) {
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const len = Math.hypot(dx, dy) || 1;
+
+    // Нормаль до сторони
+    let nx = -dy / len;
+    let ny = dx / len;
+
+    // Направляємо нормаль назовні від центроїда
+    if (nx * (mx - centroid.x) + ny * (my - centroid.y) < 0) {
+      nx = -nx;
+      ny = -ny;
+    }
+
+    const lx = mx + nx * 22;
+    const ly = my + ny * 22;
+
+    textEl.setAttribute('x', lx);
+    textEl.setAttribute('y', ly);
+    textEl.textContent = labelStr;
+
+    const width = labelStr.length * 9 + 14;
+    const height = 24;
+    rectEl.setAttribute('x', lx - width / 2);
+    rectEl.setAttribute('y', ly - height / 2);
+    rectEl.setAttribute('width', width);
+    rectEl.setAttribute('height', height);
+  }
+
+  function updateAll() {
+    // 1. Оновлюємо полігон трикутника
+    const polyPoints = `${pts.A.x},${pts.A.y} ${pts.B.x},${pts.B.y} ${pts.C.x},${pts.C.y}`;
+    document.getElementById('triPoly').setAttribute('points', polyPoints);
+
+    // 2. Обчислюємо довжини сторін у одиницях
+    const c = +(dist(pts.A, pts.B) / SCALE).toFixed(1); // AB
+    const b = +(dist(pts.A, pts.C) / SCALE).toFixed(1); // AC
+    const a = +(dist(pts.B, pts.C) / SCALE).toFixed(1); // BC
+
+    // Оновлюємо повзунки
+    document.getElementById('sliderAB').value = Math.min(15, Math.max(3, c));
+    document.getElementById('sliderAC').value = Math.min(15, Math.max(3, b));
+    document.getElementById('sliderBC').value = Math.min(18, Math.max(3, a));
+    document.getElementById('valAB').textContent = c.toFixed(1);
+    document.getElementById('valAC').textContent = b.toFixed(1);
+    document.getElementById('valBC').textContent = a.toFixed(1);
+
+    // 3. Обчислюємо кути за теоремою косинусів
+    const clampCos = (val) => Math.max(-1, Math.min(1, val));
+    const cosA = clampCos((c * c + b * b - a * a) / (2 * c * b));
+    const cosB = clampCos((c * c + a * a - b * b) / (2 * c * a));
+    const cosC = clampCos((b * b + a * a - c * c) / (2 * b * a));
+
+    const degA = +(Math.acos(cosA) * 180 / Math.PI).toFixed(1);
+    const degB = +(Math.acos(cosB) * 180 / Math.PI).toFixed(1);
+    const degC = +(180 - degA - degB).toFixed(1);
+
+    // 4. Визначаємо вид трикутника
+    const maxDeg = Math.max(degA, degB, degC);
+    const typeBadge = document.getElementById('triangleTypeBadge');
+    if (Math.abs(maxDeg - 90) <= 0.4) {
+      typeBadge.textContent = 'Прямокутний трикутник';
+      typeBadge.style.background = '#dcfce7';
+      typeBadge.style.color = '#15803d';
+    } else if (maxDeg > 90.4) {
+      typeBadge.textContent = 'Тупокутний трикутник';
+      typeBadge.style.background = '#fef3c7';
+      typeBadge.style.color = '#b45309';
+    } else {
+      typeBadge.textContent = 'Гострокутний трикутник';
+      typeBadge.style.background = '#eff6ff';
+      typeBadge.style.color = '#1d4ed8';
+    }
+
+    // 5. Малюємо дуги кутів та підписи
+    document.getElementById('arcA').setAttribute('d', createAngleArc(pts.A, pts.B, pts.C, 34));
+    document.getElementById('arcB').setAttribute('d', createAngleArc(pts.B, pts.A, pts.C, 24));
+    document.getElementById('arcC').setAttribute('d', createAngleArc(pts.C, pts.A, pts.B, 24));
+
+    placeAngleLabel(document.getElementById('angleTextA'), pts.A, pts.B, pts.C, 52, quizHidden ? '?' : `${degA}°`);
+    placeAngleLabel(document.getElementById('angleTextB'), pts.B, pts.A, pts.C, 40, `${degB}°`);
+    placeAngleLabel(document.getElementById('angleTextC'), pts.C, pts.A, pts.B, 40, `${degC}°`);
+
+    // 6. Позиціонуємо вершини та їх назви назовні від центроїда
+    const centroid = {
+      x: (pts.A.x + pts.B.x + pts.C.x) / 3,
+      y: (pts.A.y + pts.B.y + pts.C.y) / 3
+    };
+
+    ['A', 'B', 'C'].forEach(key => {
+      const p = pts[key];
+      const grp = document.getElementById(`vertex${key}`);
+      grp.setAttribute('transform', `translate(${p.x}, ${p.y})`);
+
+      const vx = p.x - centroid.x;
+      const vy = p.y - centroid.y;
+      const vl = Math.hypot(vx, vy) || 1;
+      const nameEl = document.getElementById(`name${key}`);
+      nameEl.setAttribute('x', (vx / vl) * 22);
+      nameEl.setAttribute('y', (vy / vl) * 22 + 6);
+    });
+
+    // 7. Підписи довжин сторін
+    placeSideLabel(document.getElementById('bgAB'), document.getElementById('textAB'), pts.A, pts.B, centroid, `${c}`);
+    placeSideLabel(document.getElementById('bgAC'), document.getElementById('textAC'), pts.A, pts.C, centroid, `${b}`);
+    placeSideLabel(document.getElementById('bgBC'), document.getElementById('textBC'), pts.B, pts.C, centroid, `${a}`);
+
+    // 8. Оновлюємо покрокове розв'язання праворуч
+    const num = +(c * c + b * b - a * a).toFixed(2);
+    const den = +(2 * c * b).toFixed(2);
+    const cosRounded = +cosA.toFixed(4);
+
+    document.getElementById('stepSubstitution').innerHTML = `
+      <b>2. Підстановка числових значень:</b><br>
+      cos A = (${c}² + ${b}² − ${a}²) / (2 · ${c} · ${b}) = (${(c*c).toFixed(1)} + ${(b*b).toFixed(1)} − ${(a*a).toFixed(1)}) / ${den}
+    `;
+
+    document.getElementById('stepCosValue').innerHTML = `
+      <b>3. Обчислення косинуса:</b><br>
+      cos A = ${num} / ${den} ≈ <b>${cosRounded}</b>
+    `;
+
+    if (quizHidden) {
+      document.getElementById('stepFinalAngle').innerHTML = `
+        <b>4. Величина кута A:</b><br>
+        ∠A = arccos(${cosRounded}) ≈ <b>?° (введіть відповідь вище)</b>
+      `;
+      document.getElementById('pillA').textContent = `∠A = ?`;
+    } else {
+      document.getElementById('stepFinalAngle').innerHTML = `
+        <b>4. Величина кута A:</b><br>
+        ∠A = arccos(${cosRounded}) ≈ <b>${degA}°</b>
+      `;
+      document.getElementById('pillA').textContent = `∠A = ${degA}°`;
+    }
+
+    document.getElementById('pillB').textContent = `∠B = ${degB}°`;
+    document.getElementById('pillC').textContent = `∠C = ${degC}°`;
+
+    // Зберігаємо поточний правильний кут для перевірки
+    window.currentTargetAngle = degA;
+  }
+
+  function toggleQuizMode() {
+    quizHidden = !quizHidden;
+    const btn = document.getElementById('toggleQuizBtn');
+    const controls = document.getElementById('quizControls');
+    const feedback = document.getElementById('quizFeedback');
+
+    if (quizHidden) {
+      btn.textContent = '👁️ Показати відповідь';
+      controls.classList.add('active');
+      feedback.textContent = '';
+      document.getElementById('userAngleInput').value = '';
+    } else {
+      btn.textContent = '🙈 Сховати відповідь (∠A = ?)';
+      controls.classList.remove('active');
+    }
+    updateAll();
+  }
+
+  function checkUserAnswer() {
+    const val = parseFloat(document.getElementById('userAngleInput').value);
+    const feedback = document.getElementById('quizFeedback');
+    if (isNaN(val)) {
+      feedback.style.color = '#dc2626';
+      feedback.textContent = 'Будь ласка, введіть числове значення кута в градусах.';
+      return;
+    }
+    const diff = Math.abs(val - window.currentTargetAngle);
+    if (diff <= 0.6) {
+      feedback.style.color = '#16a34a';
+      feedback.textContent = `✅ Чудово! Правильна відповідь: ${window.currentTargetAngle}°`;
+    } else {
+      feedback.style.color = '#dc2626';
+      feedback.textContent = `❌ Поки що не точно (ваше значення: ${val}°). Перевірте обчислення arccos і спробуйте ще раз!`;
+    }
+  }
+
+  // Ініціалізація при старті
+  updateAll();
+</script>
+
+</body>
+</html>
